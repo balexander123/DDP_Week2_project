@@ -1,0 +1,49 @@
+---
+title: "Peer-graded Assignment: R Markdown and Leaflet"
+author: "Barry Alexander"
+date: "July 8, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r install, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+if(!require(leaflet)) install.packages("leaflet",repos = "http://cran.us.r-project.org")
+if(!require(lubridate)) install.packages("lubridate",repos = "http://cran.us.r-project.org")
+if(!require(readr)) install.packages("readr",repos = "http://cran.us.r-project.org")
+if(!require(dplyr)) install.packages("dplyr",repos = "http://cran.us.r-project.org")
+
+library(leaflet)
+library(lubridate)
+library(readr)
+library(dplyr)
+```
+## San Francisco Crime Data
+
+The map below depicts crime data showing recent car break ins from 2018 within San Franciso, California.  Blue circles represent weekday incidents, while red represents weekends.
+
+```{r plot, echo=FALSE, message=FALSE, warning=FALSE}
+# data obtained from https://data.sfgov.org
+crimeData <- read_csv(file="Map_of_Police_Department_Incidents.csv")
+crimeData$Date = as.Date(crimeData$Date, "%m/%d/%Y")
+
+tidyCrime <- crimeData %>% 
+  select(Category, Descript, Address, DayOfWeek, Date, PdDistrict, X, Y) %>% 
+  filter(Date >= as.Date("2018-1-31"))
+
+pal <- colorFactor(c("red", "red", "blue", "blue", "blue", "blue", "blue"), domain = c("Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"))
+
+cm <- leaflet(data = tidyCrime) %>%
+  addTiles() %>%
+  addCircleMarkers(lng=tidyCrime$X, 
+                   lat=tidyCrime$Y, 
+                   radius = 6,
+                   popup = tidyCrime$Address,
+                   color = ~pal(tidyCrime$DayOfWeek), 
+                   stroke = FALSE, 
+                   fillOpacity = 0.3)
+cm
+```
+Map generated on: `r as.character(format(Sys.Date(), format="%B %d, %Y"))`
