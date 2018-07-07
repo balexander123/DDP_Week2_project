@@ -47,3 +47,5 @@ cm <- leaflet(data = tidyCrime) %>%
 cm
 ```
 Map generated on: `r as.character(format(Sys.Date(), format="%B %d, %Y"))`
+
+Source: https://github.com/balexander123/DDP_Week2_project
